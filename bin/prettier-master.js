@@ -8,6 +8,7 @@ var execFileSync = require("child_process").execFileSync;
 var prompt = "prettier-master";
 var masterBranch = process.env.MASTER_BRANCH || "master";
 var prettierCommand = process.env.PRETTIER_CMD || "prettier";
+var prettierOptions = process.env.PRETTIER_OPTS || "--write";
 var commitMessagePrefix = process.PRETTIER_COMMIT_PREFIX || prompt;
 var committerName = process.env.GITHUB_USER_NAME || "prettier-master";
 var pullRequestOnChange = process.env.PR_ON_CHANGE === "true";
@@ -178,9 +179,16 @@ function getJSFilesChanged(commitHash) {
   });
 }
 
+function getPrettierOptions() {
+  if (prettierOptions.indexOf("--write") === -1) {
+    prettierOptions += " --write";
+  }
+  return prettierOptions.split(' ');
+}
+
 function runPrettier(jsFiles) {
   try {
-    exec(prettierCommand, ["--write"].concat(jsFiles));
+    exec(prettierCommand, getPrettierOptions().concat(jsFiles));
   } catch (e) {
     if (prettierCommand === "prettier") {
       console.log(
